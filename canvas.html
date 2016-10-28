@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        #pie {
+            background: #c9c9c9;
+            float: left;
+        }
+
+        .content {
+            width: 500px;
+            height: 500px;
+            background: #c9c9c9;
+            float: left;
+            margin-left: 30px;
+        }
+    </style>
+</head>
+<body>
+<canvas id="pie" width="500" height="500"></canvas>
+<div class="content">
+
+</div>
+
+<script src="node_modules/jquery/dist/jquery.min.js"></script>
+<script>
+    var randomColor = function (opacity) {
+        return 'rgba(' + Math.round(Math.random() * 255) + ',' + Math.round(Math.random() * 255) + ',' + Math.round(Math.random() * 255) + ',' + 1 + ')';
+    };
+    $(document).ready(function () {
+        var data = [
+            {area: "广西", num: 50},
+            {area: "云南", num: 60},
+            {area: "海南", num: 96},
+            {area: "张家界", num: 34}
+        ];
+        var pie = document.querySelector('#pie');
+        var ctx = pie.getContext('2d');
+        var length = data.length;
+        var allNum = 0;
+        var angle = 0;
+        for (var i = 0; i < length; i++) {
+            allNum += data[i].num;
+        }
+        console.log(allNum);
+        function start(i) {
+            angle = 0;
+            for (var j = 0; j < i; j++) {
+                angle += data[j].num
+            }
+        }
+
+        function draw() {
+            for (var i = 0; i < length; i++) {
+                start(i);//上一个结束弧度就是下一个起始弧度
+                var startAngle = (Math.PI * 2) * (angle / allNum);//起始弧度
+                start(i + 1);
+                var endAngle = (Math.PI * 2) * (angle / allNum);//结束弧度
+                ctx.save();
+                ctx.fillStyle = randomColor();
+                ctx.beginPath();
+                ctx.moveTo(200, 200);
+                ctx.arc(200, 200, 140, startAngle, endAngle, false);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+                drawText(startAngle, endAngle, data[i].area, data[i].num / allNum);
+            }
+        }
+
+        function drawText(startAngle, endAngle, area, num) {
+            //文字的x，y坐标计算
+            var x = Math.cos((startAngle + endAngle) / 2) * (140 + 60) + 200;
+            var y = Math.sin((startAngle + endAngle) / 2) * (140 + 60) + 200;
+            ctx.fillStyle = "blue";
+            ctx.fillText(area, x, y);
+            ctx.fillStyle = "red";
+            //百分比精确到小数后两位
+            ctx.fillText((parseInt(num * 10000) / 100) + "%", x, y + 20);
+            //绘制由每个饼指向文字的线段
+            ctx.beginPath();
+            //各端点坐标由每块的起始弧度和结束弧度求平均后计算得出
+            ctx.moveTo(Math.cos((startAngle + endAngle) / 2) * 140 + 200, Math.sin((startAngle + endAngle) / 2) * 140 + 200);
+            ctx.lineTo(Math.cos((startAngle + endAngle) / 2) * (140 + 40) + 200, Math.sin((startAngle + endAngle) / 2) * (140 + 40) + 200);
+            ctx.closePath();
+            ctx.fillStyle = "red";
+            ctx.stroke();
+        }
+
+        draw();
+    });
+
+</script>
+</body>
+</html>
